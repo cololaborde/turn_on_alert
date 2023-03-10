@@ -14,7 +14,6 @@ def send_to_telegram(message):
     load_environ()
     api_token = os.environ.get("tlg_api_key")
     chat_id = os.environ.get("chat_id")
-    print(api_token)
     api_url = f'https://api.telegram.org/bot{api_token}/sendMessage'
 
     try:
