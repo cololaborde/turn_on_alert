@@ -1,7 +1,9 @@
 import requests
 import threading
 import time
+import os
 from sys import exit as terminate
+from load_environ import load_environ
 
 """ Para obtener el id del chat, se tiene que enviar un mensaje al chat del bot y acceder a 
     https://api.telegram.org/bot{{api_token}}/getUpdates
@@ -9,9 +11,10 @@ from sys import exit as terminate
 
 def send_to_telegram(message):
     """ send telegram message """
-
-    api_token = ''
-    chat_id = ''
+    load_environ()
+    api_token = os.environ.get("tlg_api_key")
+    chat_id = os.environ.get("chat_id")
+    print(api_token)
     api_url = f'https://api.telegram.org/bot{api_token}/sendMessage'
 
     try:
