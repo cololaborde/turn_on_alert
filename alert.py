@@ -29,7 +29,7 @@ def get_global_ip(retries, response):
             time.sleep(5)
             get_global_ip(retries-1, response)
     else:
-        return None
+        return [None]
 
 response = [None]*1
 t = threading.Thread(daemon=True, target=get_global_ip, args=(5, response))
