@@ -53,11 +53,10 @@ def create_thread():
     if not resp[0]:
         terminate()
 
-    return resp[0].content
+    return resp[0].content.decode()
 
 
-response_content = create_thread()
-global_ip = response_content.decode()
+global_ip = create_thread()
 text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
 Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
 send_to_telegram(text)
