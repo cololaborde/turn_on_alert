@@ -11,6 +11,10 @@ import requests
 from load_environ import load_environ
 
 
+RETRIES = 5
+TIME_OUT = 5
+
+
 def send_to_telegram(message):
     """ send telegram message """
     load_environ()
@@ -31,21 +35,28 @@ def get_global_ip(retries, response):
             response[0] = requests.get('http://ifconfig.me', verify=False, timeout=10)
             return response
         except Exception:
-            time.sleep(5)
+            time.sleep(TIME_OUT)
             get_global_ip(retries-1, response)
             return None
     else:
         return [None]
 
-resp = [None]*1
-t = threading.Thread(daemon=True, target=get_global_ip, args=(5, resp))
-t.start()
-t.join()
 
-if not resp[0]:
-    terminate()
+def create_thread():
+    """ create a thread to try to get device's global ip in background """
+    resp = [None]*1
+    thread = threading.Thread(daemon=True, target=get_global_ip, args=(RETRIES, resp))
+    thread.start()
+    thread.join()
 
-global_ip = resp[0].content.decode()
+    if not resp[0]:
+        terminate()
+
+    return resp[0].content
+
+
+response_content = create_thread()
+global_ip = response_content.decode()
 text = f"Nuevo encendido desde: {global_ip} en Windows \n\n \
 Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
 send_to_telegram(text)
