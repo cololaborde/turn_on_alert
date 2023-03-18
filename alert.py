@@ -6,6 +6,7 @@
 import os
 import time
 import threading
+import platform
 from sys import exit as terminate
 import requests
 from load_environ import load_environ
@@ -57,6 +58,6 @@ def create_thread():
 
 response_content = create_thread()
 global_ip = response_content.decode()
-text = f"Nuevo encendido desde: {global_ip} en Windows \n\n \
+text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
 Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
 send_to_telegram(text)
