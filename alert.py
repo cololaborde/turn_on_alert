@@ -29,11 +29,11 @@ def take_photo():
 
     if not ret:
         return None
-    
+    cap.release()
+
     cv2.imwrite(PHOTO_NAME, frame)
     photo = open(PHOTO_NAME, 'rb')
-    os.remove(PHOTO_NAME)
-    cap.release()
+    
     return photo
 
 
@@ -90,3 +90,5 @@ picture = take_photo()
 text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
 Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
 send_to_telegram(text, picture)
+picture.close()
+os.remove(PHOTO_NAME)
