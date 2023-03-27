@@ -8,7 +8,6 @@ import time
 import threading
 import platform
 from sys import exit as terminate
-import cv2
 import requests
 from load_environ import load_environ
 
@@ -20,6 +19,8 @@ PHOTO_NAME = 'ptoa_rdk.png'
 
 def take_photo():
     """ try to take a photo using default cam """
+    import cv2
+    
     cap = cv2.VideoCapture(0)
 
     if not cap or not cap.isOpened():
@@ -85,6 +86,8 @@ def create_thread():
     return resp[0].content.decode()
 
 
+# avoid delay to videocapture on windows
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 global_ip = create_thread()
 picture = take_photo()
 
