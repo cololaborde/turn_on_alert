@@ -14,7 +14,6 @@ from load_environ import load_environ
 
 RETRIES = 5
 TIME_OUT = 10
-PHOTO_NAME = 'ptoa_rdk.png'
 
 
 def take_photo():
@@ -40,7 +39,6 @@ def take_photo():
 
 def send_to_telegram(message, photo=None):
     """ send telegram message """
-    load_environ()
     api_token = os.environ.get("tlg_api_key")
     chat_id = os.environ.get("chat_id")
     api_base_url = f'https://api.telegram.org/bot{api_token}'
@@ -88,6 +86,10 @@ def create_thread():
 
 # avoid delay to videocapture on windows
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
+
+load_environ()
+PHOTO_NAME = os.environ.get('photo_path_01')
+
 global_ip = create_thread()
 picture = take_photo()
 
