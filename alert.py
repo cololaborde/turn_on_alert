@@ -12,7 +12,7 @@ import requests
 from load_environ import load_environ
 
 
-RETRIES = 5
+RETRIES = None
 TIME_OUT = 10
 
 
@@ -59,13 +59,13 @@ def send_to_telegram(message, photo=None):
 
 def get_global_ip(retries, response):
     """ get global ip retrying retries times and save data in response array """
-    if retries > 0:
+    if retries is None or retries > 0:
         try:
             response[0] = requests.get('http://ifconfig.me', verify=False, timeout=10)
             return response
         except Exception:
             time.sleep(TIME_OUT)
-            get_global_ip(retries-1, response)
+            get_global_ip(retries-1 if retries else None, response)
             return None
     else:
         return [None]
