@@ -11,37 +11,34 @@ import requests
 from load_environ import load_environ
 import os
 # from services.camera_service import CameraService
+from utils.thread_with_return_value import ThreadWithReturnValue
 from services.telegram_service import TelegramService
 
 RETRIES = 5
 TIME_OUT = 10
 
 
-def get_global_ip(retries, response):
+def get_global_ip(retries):
     """ get global ip retrying retries times and save data in response array """
     if retries > 0:
         try:
-            response[0] = requests.get(
+            response = requests.get(
                 'http://ifconfig.me', verify=False, timeout=10)
             return response
         except Exception:
             time.sleep(TIME_OUT)
-            get_global_ip(retries-1, response)
-            return None
+            return get_global_ip(retries-1)
     else:
-        return [None]
+        return None
 
 
 def create_thread(function, args):
-    resp = [None]*1
-    thread = threading.Thread(daemon=True, target=function, args=args + [resp])
+    thread = ThreadWithReturnValue(daemon=True, target=function, args=args)
     thread.start()
-    thread.join()
-
-    if not resp[0]:
+    result = thread.join()
+    if not result:
         terminate()
-
-    return resp[0]
+    return result
 
 
 process_response = create_thread(get_global_ip, [RETRIES])
