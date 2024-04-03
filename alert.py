@@ -17,12 +17,12 @@ RETRIES = 5
 TIME_OUT = 10
 
 
-
 def get_global_ip(retries, response):
     """ get global ip retrying retries times and save data in response array """
     if retries > 0:
         try:
-            response[0] = requests.get('http://ifconfig.me', verify=False, timeout=10)
+            response[0] = requests.get(
+                'http://ifconfig.me', verify=False, timeout=10)
             return response
         except Exception:
             time.sleep(TIME_OUT)
@@ -32,20 +32,20 @@ def get_global_ip(retries, response):
         return [None]
 
 
-def create_thread():
-    """ create a thread to try to get device's global ip in background """
+def create_thread(function, args):
     resp = [None]*1
-    thread = threading.Thread(daemon=True, target=get_global_ip, args=(RETRIES, resp))
+    thread = threading.Thread(daemon=True, target=function, args=args + [resp])
     thread.start()
     thread.join()
 
     if not resp[0]:
         terminate()
 
-    return resp[0].content.decode()
+    return resp[0]
 
 
-global_ip = create_thread()
+process_response = create_thread(get_global_ip, [RETRIES])
+global_ip = process_response.content.decode()
 
 text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
 Fecha y hora: {time.strftime('%d/%m/%Y %H:%M:%S')} \n\n \
