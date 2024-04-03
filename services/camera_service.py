@@ -8,9 +8,10 @@ class CameraService:
     
     def __exit__(self):
         self.capture.release()
+        from os import remove
+        remove(self.photo_name)
 
     def take_photo(self):
-        from os import remove
         """ try to take a photo using default cam """
 
         if not self.capture or not self.capture.isOpened():
@@ -23,5 +24,4 @@ class CameraService:
         
         cv2.imwrite(self.photo_name, frame)
         photo = open(self.photo_name, 'rb')
-        remove(self.photo_name)
         return photo
