@@ -27,7 +27,7 @@ class TelegramService:
             print(exception)
 
 
-    def process_updates(self):
+    def _process_updates(self):
         r = requests.get(self.updates_url, verify=False, timeout=10)
         response = r.json()
         if not response or 'result' not in response:
@@ -46,7 +46,7 @@ class TelegramService:
 
     def get_updates(self):
             while True:
-                action = self.process_updates()
+                action = self._process_updates()
                 if action:
                     return action
                 time.sleep(5)
