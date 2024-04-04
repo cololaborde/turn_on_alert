@@ -4,7 +4,6 @@
 """
 
 import time
-import threading
 import platform
 from sys import exit as terminate
 import requests
