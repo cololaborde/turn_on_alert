@@ -4,7 +4,7 @@ from threading import Thread
 class ThreadWithReturnValue(Thread):
 
     def __init__(self, group=None, target=None, name=None,
-                 args=(), kwargs={}, Verbose=None, daemon=None):
+                 args=(), kwargs=None, *, daemon=None):
         Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
         self._return = None
 
