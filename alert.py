@@ -3,46 +3,28 @@
     https://api.telegram.org/bot{{api_token}}/getUpdates
 """
 
-import time
-import platform
 from sys import exit as terminate
-import requests
 from load_environ import load_environ
 import os
 # from services.camera_service import CameraService
+from services.thread_service import ThreadService
 from utils.retry import retry
-from utils.thread_with_return_value import ThreadWithReturnValue
 from services.telegram_service import TelegramService
+from utils.utils import get_global_ip, get_warning_message
 
 RETRIES = 5
 TIME_OUT = 10
 
 
-@retry(RETRIES, TIME_OUT)
-def get_global_ip():
-    """ get global ip retrying retries times and save data in response array """
-    try:
-        response = requests.get('http://ifconfig.me', verify=False, timeout=10)
-        return response
-    except Exception:
-        raise
+thread_service = ThreadService()
 
 
-def create_thread(function, args=None):
-    thread = ThreadWithReturnValue(daemon=True, target=function, args=[] if args is None else args)
-    thread.start()
-    result = thread.join()
-    return result
-
-
-process_response = create_thread(get_global_ip)
+get_global_ip_retry = retry(RETRIES, TIME_OUT)(get_global_ip)
+process_response = thread_service.create_thread(get_global_ip_retry)
 if not process_response:
     terminate(1)
 global_ip = process_response.content.decode()
 
-text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
-Fecha y hora: {time.strftime('%d/%m/%Y %H:%M:%S')} \n\n \
-Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
 
 load_environ()
 tlg_service = TelegramService(
@@ -53,7 +35,7 @@ tlg_service = TelegramService(
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
 
 try:
-    send_with_retry(text)
+    send_with_retry(get_warning_message(global_ip))
 except Exception:
     raise
 
@@ -63,7 +45,6 @@ try:
     print(f"Action: {action}")
 except Exception:
     raise
-
 
 
 # camera_service = CameraService(os.environ.get("photo_name"))
