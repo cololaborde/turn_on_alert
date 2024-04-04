@@ -10,6 +10,7 @@ import requests
 from load_environ import load_environ
 import os
 # from services.camera_service import CameraService
+from utils.retry import retry
 from utils.thread_with_return_value import ThreadWithReturnValue
 from services.telegram_service import TelegramService
 
@@ -17,28 +18,24 @@ RETRIES = 5
 TIME_OUT = 10
 
 
-def get_global_ip(retries):
+@retry(RETRIES, TIME_OUT)
+def get_global_ip():
     """ get global ip retrying retries times and save data in response array """
-    if retries > 0:
-        try:
-            response = requests.get(
-                'http://ifconfig.me', verify=False, timeout=10)
-            return response
-        except Exception:
-            time.sleep(TIME_OUT)
-            return get_global_ip(retries-1)
-    else:
-        return None
+    try:
+        response = requests.get('http://ifconfig.me', verify=False, timeout=10)
+        return response
+    except Exception:
+        raise
 
 
-def create_thread(function, args):
-    thread = ThreadWithReturnValue(daemon=True, target=function, args=args)
+def create_thread(function, args=None):
+    thread = ThreadWithReturnValue(daemon=True, target=function, args=[] if args is None else args)
     thread.start()
     result = thread.join()
     return result
 
 
-process_response = create_thread(get_global_ip, [RETRIES])
+process_response = create_thread(get_global_ip)
 if not process_response:
     terminate(1)
 global_ip = process_response.content.decode()
@@ -53,8 +50,20 @@ tlg_service = TelegramService(
     os.environ.get("chat_id")
 )
 
-tlg_service.send_message(text)
-tlg_service.get_updates()
+send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
+
+try:
+    send_with_retry(text)
+except Exception:
+    raise
+
+get_updates_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.get_updates)
+try:
+    action = get_updates_with_retry()
+    print(f"Action: {action}")
+except Exception:
+    raise
+
 
 
 # camera_service = CameraService(os.environ.get("photo_name"))
