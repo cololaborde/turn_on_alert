@@ -23,8 +23,8 @@ class TelegramService:
         data = {'chat_id': self.chat_id, 'text': message, "reply_markup": json.dumps(buttons)}
         try:
             requests.post(f'{self.send_url}', data=data, verify=False, timeout=10)
-        except Exception as exception:
-            print(exception)
+        except Exception:
+            raise
 
 
     def _process_updates(self):
