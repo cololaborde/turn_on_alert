@@ -1,11 +1,12 @@
 import cv2
 
+
 class CameraService:
 
     def __init__(self, photo_name: str):
         self.photo_name = photo_name
         self.capture = cv2.VideoCapture(0)
-    
+
     def __exit__(self):
         self.capture.release()
         from os import remove
@@ -21,7 +22,7 @@ class CameraService:
 
         if not ret:
             return None
-        
+
         cv2.imwrite(self.photo_name, frame)
         photo = open(self.photo_name, 'rb')
         return photo
