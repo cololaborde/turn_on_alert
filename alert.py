@@ -35,12 +35,12 @@ def create_thread(function, args):
     thread = ThreadWithReturnValue(daemon=True, target=function, args=args)
     thread.start()
     result = thread.join()
-    if not result:
-        terminate()
     return result
 
 
 process_response = create_thread(get_global_ip, [RETRIES])
+if not process_response:
+    terminate(1)
 global_ip = process_response.content.decode()
 
 text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
