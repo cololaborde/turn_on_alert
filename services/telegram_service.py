@@ -30,7 +30,10 @@ class TelegramService:
             raise
 
     def _process_updates(self):
-        r = requests.get(self.updates_url, verify=False, timeout=10)
+        try:
+            r = requests.get(self.updates_url, verify=False, timeout=10)
+        except Exception:
+            raise
         response = r.json()
         if not response or 'result' not in response:
             return None
