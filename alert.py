@@ -4,9 +4,8 @@
 """
 
 from sys import exit as terminate
-from load_environ import load_environ
-import os
-# from services.camera_service import CameraService
+from services.camera_service import CameraService
+from services.os_service import OSService
 from services.thread_service import ThreadService
 from utils.retry import retry
 from services.telegram_service import TelegramService
@@ -26,10 +25,10 @@ if not process_response:
 global_ip = process_response.content.decode()
 
 
-load_environ()
+os_service = OSService()
 tlg_service = TelegramService(
-    os.environ.get("tlg_api_key"),
-    os.environ.get("chat_id")
+    os_service.get_environ("tlg_api_key"),
+    os_service.get_environ("chat_id")
 )
 
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
@@ -45,7 +44,3 @@ try:
     print(f"Action: {action}")
 except Exception:
     raise
-
-
-# camera_service = CameraService(os.environ.get("photo_name"))
-# photo = camera_service.take_photo()
