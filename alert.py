@@ -3,101 +3,61 @@
     https://api.telegram.org/bot{{api_token}}/getUpdates
 """
 
-import os
-import time
-import threading
-import platform
 from sys import exit as terminate
-import requests
-from load_environ import load_environ
-
+from services.camera_service import CameraService
+from services.os_service import OSService
+from services.thread_service import ThreadService
+from utils.retry import retry
+from services.telegram_service import TelegramService
+from utils.utils import get_global_ip, get_warning_message
 
 RETRIES = None
-TIME_OUT = 10
+TIME_OUT = 5
 
 
-def take_photo():
-    """ try to take a photo using default cam """
-    import cv2
-    
-    cap = cv2.VideoCapture(0)
-
-    if not cap or not cap.isOpened():
-        return None
-
-    ret, frame = cap.read()
-
-    if not ret:
-        return None
-    cap.release()
-
-    cv2.imwrite(PHOTO_NAME, frame)
-    photo = open(PHOTO_NAME, 'rb')
-    
-    return photo
+thread_service = ThreadService()
 
 
-def send_to_telegram(message, photo=None):
-    """ send telegram message """
-    api_token = os.environ.get("tlg_api_key")
-    chat_id = os.environ.get("chat_id")
-    api_base_url = f'https://api.telegram.org/bot{api_token}'
-    data = {'chat_id': chat_id, 'text': message}
-    try:
-        requests.post(f'{api_base_url}/sendMessage', data=data, verify=False, timeout=10)
-    except Exception as exception:
-        print(exception)
-
-    if not photo:
-        return
-    data = {'chat_id': chat_id}
-    try:
-        requests.post(f'{api_base_url}/sendPhoto', data=data, files={'photo': photo}, verify=False, timeout=10)
-    except Exception as exception:
-        print(exception)
+get_global_ip_retry = retry(RETRIES, TIME_OUT)(get_global_ip)
+process_response = thread_service.create_thread(get_global_ip_retry)
+if not process_response:
+    terminate(1)
+global_ip = process_response.content.decode()
 
 
-def get_global_ip(retries, response):
-    """ get global ip retrying retries times and save data in response array """
-    if retries is None or retries > 0:
+os_service = OSService()
+tlg_service = TelegramService(
+    os_service.get_environ("tlg_api_key"),
+    os_service.get_environ("chat_id")
+)
+
+send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
+
+try:
+    send_with_retry(get_warning_message(global_ip))
+except Exception:
+    raise
+
+get_updates_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.process_updates)
+try:
+    action = get_updates_with_retry()
+    print(f"Action: {action}")
+    send_photo_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_photo)
+    if action == "safe":
+        terminate(0)
+    elif action == "photo":
+        camera_service = CameraService(os_service.get_environ("photo_name"))
+        photo = camera_service.take_photo()
         try:
-            response[0] = requests.get('http://ifconfig.me', verify=False, timeout=10)
-            return response
+            send_photo_with_retry(photo)
         except Exception:
-            time.sleep(TIME_OUT)
-            get_global_ip(retries-1 if retries else None, response)
-            return None
-    else:
-        return [None]
-
-
-def create_thread():
-    """ create a thread to try to get device's global ip in background """
-    resp = [None]*1
-    thread = threading.Thread(daemon=True, target=get_global_ip, args=(RETRIES, resp))
-    thread.start()
-    thread.join()
-
-    if not resp[0]:
-        terminate()
-
-    return resp[0].content.decode()
-
-
-# avoid delay to videocapture on windows
-os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
-
-load_environ()
-PHOTO_NAME = os.environ.get('photo_path_01')
-
-global_ip = create_thread()
-picture = take_photo()
-
-text = f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
-Fecha y hora: {time.strftime('%d/%m/%Y %H:%M:%S')} \n\n \
-Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
-send_to_telegram(text, picture)
-
-if picture:
-    picture.close()
-    os.remove(PHOTO_NAME)
+            raise
+    elif action == "capture":
+        capture = os_service.get_screen_shot()
+        send_photo_with_retry(capture)
+    elif action == "lock":
+        os_service.lock_screen()
+    elif action == "turn_off":
+        os_service.turn_off()
+except Exception:
+    raise

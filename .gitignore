@@ -2,3 +2,4 @@ load_environ.py
 __pycache__
 venv
 alert.sh
+processed_ids.json
