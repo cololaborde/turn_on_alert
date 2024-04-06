@@ -11,7 +11,7 @@ from utils.retry import retry
 from services.telegram_service import TelegramService
 from utils.utils import get_global_ip, get_warning_message
 
-RETRIES = 5
+RETRIES = None
 TIME_OUT = 10
 
 

@@ -28,8 +28,8 @@ class TelegramService:
         data = {'chat_id': self.chat_id, 'text': message,
                 "reply_markup": json.dumps(buttons)}
         try:
-            requests.post(f'{self.send_url}', data=data,
-                          verify=False, timeout=10)
+            return requests.post(f'{self.send_url}', data=data,
+                                 verify=False, timeout=10)
         except Exception:
             raise
 
@@ -65,7 +65,7 @@ class TelegramService:
         data = {'chat_id': self.chat_id}
         files = {'photo': photo}
         try:
-            requests.post(self.send_photo_url, data=data,
-                          files=files, verify=False, timeout=10)
+            return requests.post(self.send_photo_url, data=data,
+                                 files=files, verify=False, timeout=10)
         except Exception:
             raise
