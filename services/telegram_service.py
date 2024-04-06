@@ -2,6 +2,8 @@ import requests
 import json
 import time
 
+from utils.utils import get_processed_updates, save_processed_updates
+
 
 class TelegramService:
     def __init__(self, token: str, chat_id: str):
@@ -10,6 +12,7 @@ class TelegramService:
         self.send_url = f'https://api.telegram.org/bot{self.token}/sendMessage'
         self.updates_url = f"https://api.telegram.org/bot{self.token}/getUpdates"
         self.send_photo_url = f"https://api.telegram.org/bot{self.token}/sendPhoto"
+        self.processed_ids = get_processed_updates()
 
     def send_message(self, message: str):
         buttons = {
@@ -43,9 +46,11 @@ class TelegramService:
             if 'callback_query' not in update:
                 continue
             callback_query = update['callback_query']
-            message_date = callback_query['message']['date']
-            if (time.time() - message_date) < 20:
+            callback_id = callback_query['id']
+            if callback_id and callback_id not in self.processed_ids:
+                self.processed_ids.append(callback_id)
                 action = callback_query['data']
+                save_processed_updates(self.processed_ids)
                 return action
         return None
 
@@ -60,6 +65,7 @@ class TelegramService:
         data = {'chat_id': self.chat_id}
         files = {'photo': photo}
         try:
-            requests.post(self.send_photo_url, data=data, files=files, verify=False, timeout=10)
+            requests.post(self.send_photo_url, data=data,
+                          files=files, verify=False, timeout=10)
         except Exception:
             raise
