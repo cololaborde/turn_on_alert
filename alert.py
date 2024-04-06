@@ -41,14 +41,17 @@ except Exception:
 get_updates_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.get_updates)
 try:
     action = get_updates_with_retry()
+    print(f"Action: {action}")
+    send_photo_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_photo)
     if action == "photo":
         camera_service = CameraService(os_service.get_environ("photo_name"))
         photo = camera_service.take_photo()
-        send_photo_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_photo)
         try:
             send_photo_with_retry(photo)
         except Exception:
             raise
-    print(f"Action: {action}")
+    elif action == "capture":
+        capture = os_service.get_screen_shot()
+        send_photo_with_retry(capture)
 except Exception:
     raise
