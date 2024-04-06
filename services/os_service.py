@@ -1,7 +1,7 @@
 import os
 import platform
 
-from load_environ import load_environ
+from utils.load_environ import load_environ
 
 class OSService:
 
@@ -12,7 +12,6 @@ class OSService:
         return os.environ.get(key)
 
     def get_screen_shot(self):
-        print(platform.system())
         if platform.system() == "Windows":
             print("Windows")
         elif platform.system() == "Linux":
