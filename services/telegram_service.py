@@ -1,7 +1,5 @@
 import requests
 import json
-import time
-
 from utils.utils import get_processed_updates, save_processed_updates
 
 
