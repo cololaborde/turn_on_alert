@@ -10,16 +10,19 @@ def retry(retries, timeout):
                     return func(*args, **kwargs)
                 except Exception as e:
                     print(f"Error: {e}")
-                    time.sleep(timeout)
 
             if not retries:
                 while True:
                     r = block()
                     if r:
                         return r
+                    time.sleep(timeout)
             else:
                 for _ in range(retries):
-                    return block()
+                    r = block()
+                    if r:
+                        return r
+                    time.sleep(timeout)
                         
             return None
         return wrapper
