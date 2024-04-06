@@ -9,6 +9,7 @@ class TelegramService:
         self.chat_id = chat_id
         self.send_url = f'https://api.telegram.org/bot{self.token}/sendMessage'
         self.updates_url = f"https://api.telegram.org/bot{self.token}/getUpdates"
+        self.send_photo_url = f"https://api.telegram.org/bot{self.token}/sendPhoto"
 
     def send_message(self, message: str):
         buttons = {
@@ -54,3 +55,11 @@ class TelegramService:
             if action:
                 return action
             time.sleep(5)
+
+    def send_photo(self, photo):
+        data = {'chat_id': self.chat_id}
+        files = {'photo': photo}
+        try:
+            requests.post(self.send_photo_url, data=data, files=files, verify=False, timeout=10)
+        except Exception:
+            raise
