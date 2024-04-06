@@ -53,5 +53,9 @@ try:
     elif action == "capture":
         capture = os_service.get_screen_shot()
         send_photo_with_retry(capture)
+    elif action == "lock":
+        os_service.lock_screen()
+    elif action == "turn_off":
+        os_service.turn_off()
 except Exception:
     raise
