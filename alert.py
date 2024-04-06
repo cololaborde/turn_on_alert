@@ -43,7 +43,9 @@ try:
     action = get_updates_with_retry()
     print(f"Action: {action}")
     send_photo_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_photo)
-    if action == "photo":
+    if action == "safe":
+        terminate(0)
+    elif action == "photo":
         camera_service = CameraService(os_service.get_environ("photo_name"))
         photo = camera_service.take_photo()
         try:
