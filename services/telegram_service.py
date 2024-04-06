@@ -33,7 +33,7 @@ class TelegramService:
         except Exception:
             raise
 
-    def _process_updates(self):
+    def process_updates(self):
         try:
             r = requests.get(self.updates_url, verify=False, timeout=10)
         except Exception:
@@ -53,13 +53,6 @@ class TelegramService:
                 save_processed_updates(self.processed_ids)
                 return action
         return None
-
-    def get_updates(self):
-        while True:
-            action = self._process_updates()
-            if action:
-                return action
-            time.sleep(5)
 
     def send_photo(self, photo):
         data = {'chat_id': self.chat_id}

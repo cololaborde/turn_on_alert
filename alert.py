@@ -12,7 +12,7 @@ from services.telegram_service import TelegramService
 from utils.utils import get_global_ip, get_warning_message
 
 RETRIES = None
-TIME_OUT = 10
+TIME_OUT = 5
 
 
 thread_service = ThreadService()
@@ -38,7 +38,7 @@ try:
 except Exception:
     raise
 
-get_updates_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.get_updates)
+get_updates_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.process_updates)
 try:
     action = get_updates_with_retry()
     print(f"Action: {action}")
