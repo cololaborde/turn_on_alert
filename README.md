@@ -50,12 +50,13 @@ Upon system boot, the program automatically sends an alert message to the design
 
 ### 2. Control Options:
 
-Interact with the program via buttons in the Telegram chat to perform various actions on the system. Some available options may include:
-Was me: Mark the system startup as safe.
-Take Photo: Capture a photo using the system camera.
-Screenshot: Take a screenshot of the system screen.
-Lock Screen: Lock the system screen.
-Turn Off: Shut down the system.
+Interact with the program via buttons in the Telegram chat to perform various actions on the system. The available options may include:
+
+- #### Was me: Mark the system startup as safe.
+- #### Take Photo: Capture a photo using the system camera.
+- #### Screenshot: Take a screenshot of the system screen.
+- #### Lock Screen: Lock the system screen.
+- #### Turn Off: Shut down the system.
 You can add more options as needed.
 
 
