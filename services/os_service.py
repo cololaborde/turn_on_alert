@@ -1,6 +1,6 @@
 import os
 import platform
-
+from PIL import ImageGrab
 from utils.load_environ import load_environ
 
 
@@ -9,15 +9,17 @@ class OSService:
     def __init__(self):
         load_environ()
 
+    def set_environ(self, key, value):
+        os.environ[key] = value
+
     def get_environ(self, key):
         return os.environ.get(key)
 
     def get_screen_shot(self):
-        if platform.system() == "Windows":
-            print("Windows")
-        elif platform.system() == "Linux":
-            os.system("gnome-screenshot -f /home/colo/ptoa_rdk.png")
-            return open("/home/colo/ptoa_rdk.png", "rb")
+        screenshot = ImageGrab.grab()
+        path = self.get_environ("photo_name")
+        screenshot.save(path)
+        return open(path, "rb")
 
     def lock_screen(self):
         if platform.system() == "Windows":
