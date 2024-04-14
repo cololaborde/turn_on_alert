@@ -46,6 +46,7 @@ try:
     if action == "safe":
         terminate(0)
     elif action == "photo":
+        os_service.set_environ("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0")
         camera_service = CameraService(os_service.get_environ("photo_name"))
         photo = camera_service.take_photo()
         try:

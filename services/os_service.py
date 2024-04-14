@@ -9,6 +9,9 @@ class OSService:
     def __init__(self):
         load_environ()
 
+    def set_environ(self, key, value):
+        os.environ[key] = value
+
     def get_environ(self, key):
         return os.environ.get(key)
 
