@@ -14,10 +14,7 @@ class OSService:
 
     def get_screen_shot(self):
         screenshot = ImageGrab.grab()
-        if platform.system() == "Windows":
-            path = "C:/Users/colo/ptoa_rdk.png"
-        elif platform.system() == "Linux":
-            path = "/home/colo/ptoa_rdk.png"
+        path = self.get_environ("photo_name")
         screenshot.save(path)
         return open(path, "rb")
 
