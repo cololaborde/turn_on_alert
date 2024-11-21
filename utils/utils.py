@@ -24,6 +24,20 @@ def get_data_from_ip(ip):
         raise
 
 
+def get_warning_message(global_ip):
+    ip_data = get_data_from_ip(global_ip)
+    return (
+        f"⚠️ Nuevo inicio detectado ⚠️\n\n"
+        f"🌐 IP: {ip_data['query']} ({ip_data['city']}, {ip_data['regionName']}, {ip_data['country']})\n"
+        f"📍 Ubicación: {ip_data['lat']}, {ip_data['lon']}\n"
+        f"🕒 Zona horaria: {ip_data['timezone']}\n"
+        f"🏢 Proveedor: {ip_data['isp']} ({ip_data['org']})\n"
+        f"🖥️ Sistema: {platform.system()}\n"
+        f"📅 Fecha y hora: {time.strftime('%d/%m/%Y %H:%M:%S')}\n\n"
+        f"🔗 Más información: https://www.infobyip.com/ip-{ip_data['query']}.html"
+    ), ip_data["lat"], ip_data["lon"]
+
+
 def get_processed_updates():
     """ Cargar los IDs de actualizaciones procesadas desde el archivo (si existe) """
     try:
