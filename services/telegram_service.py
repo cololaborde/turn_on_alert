@@ -13,17 +13,9 @@ class TelegramService:
         self.send_location_url = f"https://api.telegram.org/bot{self.token}/sendLocation"
         self.processed_ids = get_processed_updates()
 
-    def send_message(self, message: str):
-        buttons = {
-            "inline_keyboard": [
-                [{"text": "Was me", "callback_data": "safe"},
-                 {"text": "Lock", "callback_data": "lock"},
-                    {"text": "Turn off", "callback_data": "turn_off"},
-                    {"text": "Capture", "callback_data": "capture"},
-                    {"text": "Photo", "callback_data": "photo"}]
-            ]
-        }
-
+    def send_message(self, message: str, buttons=None):
+        if not buttons:
+            buttons = {}
         data = {'chat_id': self.chat_id, 'text': message,
                 "reply_markup": json.dumps(buttons)}
         try:

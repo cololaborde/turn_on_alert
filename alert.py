@@ -31,11 +31,21 @@ tlg_service = TelegramService(
     os_service.get_environ("chat_id")
 )
 
+buttons = {
+    "inline_keyboard": [
+        [{"text": "Was me", "callback_data": "safe"},
+         {"text": "Lock", "callback_data": "lock"},
+         {"text": "Turn off", "callback_data": "turn_off"},
+         {"text": "Capture", "callback_data": "capture"},
+         {"text": "Photo", "callback_data": "photo"}]
+    ]
+}
+
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
 send_location_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_location)
 message, lat, lon = get_warning_message(global_ip)
 try:
-    send_with_retry(message)
+    send_with_retry(message, buttons=buttons)
     send_location_with_retry(lat, lon)
 except Exception:
     raise
@@ -52,7 +62,10 @@ try:
         camera_service = CameraService(os_service.get_environ("photo_name"))
         photo = camera_service.take_photo()
         try:
-            send_photo_with_retry(photo)
+            if not photo:
+                send_with_retry("Camera not available")
+            else:
+                send_photo_with_retry(photo)
         except Exception:
             raise
     elif action == "capture":
