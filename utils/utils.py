@@ -13,10 +13,15 @@ def get_global_ip():
         raise
 
 
-def get_warning_message(global_ip: str):
-    return f"Nuevo encendido desde: {global_ip} en {platform.system()} \n\n \
-        Fecha y hora: {time.strftime('%d/%m/%Y %H:%M:%S')} \n\n \
-        Mas información en: https://www.infobyip.com/ip-{global_ip}.html"
+def get_data_from_ip(ip):
+    """ Obtener la latitud y longitud de una IP """
+    try:
+        response = requests.get(
+            f'http://ip-api.com/json/{ip}', verify=False, timeout=10)
+        data = response.json()
+        return data
+    except Exception:
+        raise
 
 
 def get_processed_updates():
