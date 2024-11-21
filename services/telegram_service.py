@@ -10,6 +10,7 @@ class TelegramService:
         self.send_url = f'https://api.telegram.org/bot{self.token}/sendMessage'
         self.updates_url = f"https://api.telegram.org/bot{self.token}/getUpdates"
         self.send_photo_url = f"https://api.telegram.org/bot{self.token}/sendPhoto"
+        self.send_location_url = f"https://api.telegram.org/bot{self.token}/sendLocation"
         self.processed_ids = get_processed_updates()
 
     def send_message(self, message: str):
@@ -58,5 +59,13 @@ class TelegramService:
         try:
             return requests.post(self.send_photo_url, data=data,
                                  files=files, verify=False, timeout=10)
+        except Exception:
+            raise
+
+    def send_location(self, lat, lon):
+        data = {'chat_id': self.chat_id, 'latitude': lat, 'longitude': lon}
+        try:
+            return requests.post(self.send_location_url, data=data,
+                                 verify=False, timeout=10)
         except Exception:
             raise
