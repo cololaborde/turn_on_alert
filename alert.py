@@ -32,9 +32,11 @@ tlg_service = TelegramService(
 )
 
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
-
+send_location_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_location)
+message, lat, lon = get_warning_message(global_ip)
 try:
-    send_with_retry(get_warning_message(global_ip))
+    send_with_retry(message)
+    send_location_with_retry(lat, lon)
 except Exception:
     raise
 
