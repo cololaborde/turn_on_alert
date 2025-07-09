@@ -32,13 +32,15 @@ tlg_service = TelegramService(
 )
 
 buttons = {
-    "inline_keyboard": [
-        [{"text": "Was me", "callback_data": "safe"},
-         {"text": "Lock", "callback_data": "lock"},
-         {"text": "Turn off", "callback_data": "turn_off"},
-         {"text": "Capture", "callback_data": "capture"},
-         {"text": "Photo", "callback_data": "photo"}]
-    ]
+    "inline_keyboard": [[
+        {"text": "🆗", "callback_data": "safe"},
+        {"text": "🔒", "callback_data": "lock"},
+        {"text": "OFF", "callback_data": "turn_off"},
+        {"text": "🖼️", "callback_data": "capture"},
+        {"text": "📷", "callback_data": "photo"},
+        {"text": "🔇", "callback_data": "mute"},
+        {"text": "!🔇", "callback_data": "unmute"}
+        ]]
 }
 
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
@@ -75,5 +77,9 @@ try:
         os_service.lock_screen()
     elif action == "turn_off":
         os_service.turn_off()
+    elif action == "mute":
+        os_service.mute_system()
+    elif action == "unmute":
+        os_service.unmute_system()
 except Exception:
     raise
