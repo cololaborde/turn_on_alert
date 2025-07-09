@@ -37,3 +37,19 @@ class OSService:
             os_system("poweroff")
         elif system() == "Darwin":
             os_system("shutdown -h now")
+
+    def mute_system(self):
+        if system() == "Windows":
+            os_system("nircmd mutesysvolume 1")
+        elif system() == "Linux":
+            os_system("amixer set Master mute")
+        elif system() == "Darwin":
+            os_system("osascript -e 'set volume output muted true'")
+
+    def unmute_system(self):
+        if system() == "Windows":
+            os_system("nircmd mutesysvolume 0")
+        elif system() == "Linux":
+            os_system("amixer set Master unmute")
+        elif system() == "Darwin":
+            os_system("osascript -e 'set volume output muted false'")
