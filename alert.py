@@ -62,16 +62,15 @@ while True:
         if action == "safe":
             terminate(0)
         elif action == "photo":
-            os_service.set_environ("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0")
-            camera_service = CameraService(os_service.get_environ("photo_name"))
-            photo = camera_service.take_photo()
-            try:
-                if not photo:
-                    send_with_retry("Camera not available")
-                else:
-                    send_photo_with_retry(photo)
-            except Exception:
-                raise
+            with CameraService() as camera_service:
+                photo = camera_service.take_photo()
+                try:
+                    if not photo:
+                        send_with_retry("Camera not available")
+                    else:
+                        send_photo_with_retry(photo)
+                except Exception:
+                    raise
         elif action == "capture":
             capture = os_service.get_screen_shot()
             send_photo_with_retry(capture)
