@@ -1,8 +1,9 @@
-certifi>=2024.07.04
+certifi==2024.2.2
 charset-normalizer==3.3.2
 idna==3.7
 numpy==1.24.4
 opencv-python==4.9.0.80
-requests>=2.32.0
-urllib3>=2.2.2
 pillow==10.3.0
+pyusb==1.2.1
+requests==2.31.0
+urllib3==2.2.1

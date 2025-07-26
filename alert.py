@@ -14,6 +14,13 @@ from utils.utils import get_global_ip, get_warning_message
 RETRIES = None
 TIME_OUT = 5
 
+os_service = OSService()
+
+from usb.core import find as usb_find
+device = usb_find(idVendor=int(os_service.get_environ("vendor_id"), 16), idProduct=int(os_service.get_environ("product_id"), 16))
+if device:
+    terminate(0)
+
 
 thread_service = ThreadService()
 
@@ -25,7 +32,6 @@ if not process_response:
 global_ip = process_response.content.decode()
 
 
-os_service = OSService()
 tlg_service = TelegramService(
     os_service.get_environ("tlg_api_key"),
     os_service.get_environ("chat_id")
