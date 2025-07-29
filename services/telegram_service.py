@@ -1,7 +1,8 @@
 import requests
 import json
-from utils.utils import get_processed_updates, save_processed_updates
-
+from utils.utils import get_processed_updates, save_processed_updates, compress_image
+from PIL import Image
+from io import BytesIO
 
 class TelegramService:
     def __init__(self, token: str, chat_id: str):
@@ -45,12 +46,14 @@ class TelegramService:
                 return action
         return None
 
-    def send_photo(self, photo):
+    def send_photo(self, photo_file):
+        
+        buffer, img_format = compress_image(photo_file)
+
         data = {'chat_id': self.chat_id}
-        files = {'photo': photo}
+        files = {'photo': ('image.' + img_format.lower(), buffer, f'image/{img_format.lower()}')}
         try:
-            return requests.post(self.send_photo_url, data=data,
-                                 files=files, verify=False, timeout=10)
+            return requests.post(self.send_photo_url, data=data, files=files, verify=False, timeout=10)
         except Exception:
             raise
 
