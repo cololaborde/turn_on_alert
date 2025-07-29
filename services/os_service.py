@@ -16,9 +16,22 @@ class OSService:
         return environ.get(key)
 
     def get_screen_shot(self):
-        screenshot = ImageGrab.grab()
-        path = self.get_environ("photo_name")
-        screenshot.save(path)
+        path = self.get_environ("photo_name") or "screenshot.png"
+        if system() == "Windows":
+            try:
+                ImageGrab.grab().save(path, "PNG")
+            except Exception as e:
+                print(f"Error al tomar la captura de pantalla: {e}")
+        elif system() == "Linux":
+            try:
+                os_system(f"gnome-screenshot -f {path}")
+            except Exception as e:
+                print(f"Error al tomar la captura de pantalla: {e}")
+        elif system() == "Darwin":
+            try:
+                os_system(f"screencapture -x {path}")
+            except Exception as e:
+                print(f"Error al tomar la captura de pantalla: {e}")
         return open(path, "rb")
 
     def lock_screen(self):
