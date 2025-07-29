@@ -2,6 +2,8 @@ from platform import system
 from time import strftime
 from requests import get
 from json import load, dump
+from io import BytesIO
+from PIL.Image import open as pil_image_open, LANCZOS
 
 
 def get_global_ip():
@@ -52,3 +54,16 @@ def save_processed_updates(processed_ids):
     """ Guardar los IDs de actualizaciones procesadas en un archivo """
     with open('processed_ids.json', 'w') as f:
         dump(processed_ids, f, indent=4)
+
+
+def compress_image(photo_file, max_size=(800, 800)):
+    img = pil_image_open(photo_file)
+
+    img.thumbnail(max_size, LANCZOS)
+
+    buffer = BytesIO()
+    img_format = img.format if img.format in ['JPEG', 'PNG'] else 'JPEG'
+
+    img.save(buffer, format=img_format, quality=85, optimize=True)
+    buffer.seek(0)
+    return buffer, img_format
