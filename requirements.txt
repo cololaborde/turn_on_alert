@@ -5,5 +5,5 @@ numpy==1.24.4
 opencv-python==4.9.0.80
 pillow==10.3.0
 pyusb==1.2.1
-requests==2.31.0
+requests==2.32.4
 urllib3==2.2.1
