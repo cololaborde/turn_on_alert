@@ -9,7 +9,7 @@ from services.os_service import OSService
 from services.thread_service import ThreadService
 from utils.retry import retry
 from services.telegram_service import TelegramService
-from utils.utils import get_global_ip, get_warning_message
+from utils.utils import get_global_ip, get_warning_message, get_buttons
 
 RETRIES = None
 TIME_OUT = 5
@@ -21,9 +21,7 @@ device = usb_find(idVendor=int(os_service.get_environ("vendor_id"), 16), idProdu
 if device:
     terminate(0)
 
-
 thread_service = ThreadService()
-
 
 get_global_ip_retry = retry(RETRIES, TIME_OUT)(get_global_ip)
 process_response = thread_service.create_thread(get_global_ip_retry)
@@ -31,29 +29,16 @@ if not process_response:
     terminate(1)
 global_ip = process_response.content.decode()
 
-
 tlg_service = TelegramService(
     os_service.get_environ("tlg_api_key"),
     os_service.get_environ("chat_id")
 )
 
-buttons = {
-    "inline_keyboard": [[
-        {"text": "🆗", "callback_data": "safe"},
-        {"text": "🔒", "callback_data": "lock"},
-        {"text": "OFF", "callback_data": "turn_off"},
-        {"text": "🖼️", "callback_data": "capture"},
-        {"text": "📷", "callback_data": "photo"},
-        {"text": "🔇", "callback_data": "mute"},
-        {"text": "!🔇", "callback_data": "unmute"}
-        ]]
-}
-
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
 send_location_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_location)
 message, lat, lon = get_warning_message(global_ip)
 try:
-    send_with_retry(message, buttons=buttons)
+    send_with_retry(message, buttons=get_buttons())
     send_location_with_retry(lat, lon)
 except Exception:
     raise

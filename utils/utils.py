@@ -39,6 +39,19 @@ def get_warning_message(global_ip):
         f"🔗 Más información: https://www.infobyip.com/ip-{ip_data['query']}.html"
     ), ip_data["lat"], ip_data["lon"]
 
+def get_buttons():
+    return {
+        "inline_keyboard": [[
+            {"text": "🆗", "callback_data": "safe"},
+            {"text": "🔒", "callback_data": "lock"},
+            {"text": "OFF", "callback_data": "turn_off"},
+            {"text": "🖼️", "callback_data": "capture"},
+            {"text": "📷", "callback_data": "photo"},
+            {"text": "🔇", "callback_data": "mute"},
+            {"text": "!🔇", "callback_data": "unmute"}
+            ]]
+    }
+
 
 def get_processed_updates():
     """ Cargar los IDs de actualizaciones procesadas desde el archivo (si existe) """
