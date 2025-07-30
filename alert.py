@@ -10,13 +10,41 @@ from services.thread_service import ThreadService
 from utils.retry import retry
 from services.telegram_service import TelegramService
 from utils.utils import get_global_ip, get_warning_message, get_buttons
+from usb.core import find as usb_find
 
 RETRIES = None
 TIME_OUT = 5
 
+def handle_photo():
+    with CameraService() as camera:
+        photo = camera.take_photo()
+        if not photo:
+            send_msg("Camera not available")
+        else:
+            send_photo(photo)
+
+def handle_action(action):
+    actions = {
+        "safe": lambda: terminate(0),
+        "photo": lambda: handle_photo(),
+        "capture": lambda: send_photo(os_service.get_screen_shot()),
+        "lock": os_service.lock_screen,
+        "turn_off": os_service.turn_off,
+        "mute": os_service.mute_system,
+        "unmute": os_service.unmute_system,
+    }
+
+    if action in actions:
+        try:
+            actions[action]()
+        except Exception as e:
+            send_msg(f"Error executing action '{action}': {e}")
+    else:
+        send_msg(f"Unknown action: {action}")
+
+
 os_service = OSService()
 
-from usb.core import find as usb_find
 device = usb_find(idVendor=int(os_service.get_environ("vendor_id"), 16), idProduct=int(os_service.get_environ("product_id"), 16))
 if device:
     terminate(0)
@@ -45,33 +73,13 @@ except Exception:
 
 get_updates_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.process_updates)
 
+send_msg = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
+send_photo = retry(RETRIES, TIME_OUT)(tlg_service.send_photo)
+
 while True:
     try:
         action = get_updates_with_retry()
         print(f"Action: {action}")
-        send_photo_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_photo)
-        if action == "safe":
-            terminate(0)
-        elif action == "photo":
-            with CameraService() as camera_service:
-                photo = camera_service.take_photo()
-                try:
-                    if not photo:
-                        send_with_retry("Camera not available")
-                    else:
-                        send_photo_with_retry(photo)
-                except Exception:
-                    raise
-        elif action == "capture":
-            capture = os_service.get_screen_shot()
-            send_photo_with_retry(capture)
-        elif action == "lock":
-            os_service.lock_screen()
-        elif action == "turn_off":
-            os_service.turn_off()
-        elif action == "mute":
-            os_service.mute_system()
-        elif action == "unmute":
-            os_service.unmute_system()
-    except Exception:
-        raise
+        handle_action(action)
+    except Exception as e:
+        print(f"[ERROR] {e}")
