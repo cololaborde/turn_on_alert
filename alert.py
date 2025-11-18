@@ -45,7 +45,13 @@ def handle_action(action):
 
 os_service = OSService()
 
-device = usb_find(idVendor=int(os_service.get_environ("vendor_id"), 16), idProduct=int(os_service.get_environ("product_id"), 16))
+vendor_id = os_service.get_environ("vendor_id")
+product_id = os_service.get_environ("product_id")
+
+vendor_id = int(vendor_id, 16) if vendor_id else None
+product_id = int(product_id, 16) if product_id else None
+
+device = usb_find(idVendor=vendor_id, idProduct=product_id)
 if device:
     terminate(0)
 
