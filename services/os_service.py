@@ -1,6 +1,7 @@
 from os import environ, system as os_system
 from platform import system
 from PIL import ImageGrab
+import shutil
 from utils.load_environ import load_environ
 
 
@@ -19,30 +20,67 @@ class OSService:
     def get_screen_shot(self):
         path = self.get_environ("photo_name") or "screenshot.png"
         if self.system == "Windows":
-            try:
-                ImageGrab.grab().save(path, "PNG")
-            except Exception as e:
-                print(f"Error al tomar la captura de pantalla: {e}")
+            ImageGrab.grab().save(path, "PNG")
+
         elif self.system == "Linux":
-            try:
+            # 1. Wayland (grim)
+            if shutil.which("grim"):
+                os_system(f"grim {path}")
+            # 2. GNOME X11
+            elif shutil.which("gnome-screenshot"):
                 os_system(f"gnome-screenshot -f {path}")
-            except Exception as e:
-                print(f"Error al tomar la captura de pantalla: {e}")
+            # 3. scrot (X11)
+            elif shutil.which("scrot"):
+                os_system(f"scrot {path}")
+            # 4. maim (X11)
+            elif shutil.which("maim"):
+                os_system(f"maim {path}")
+            # 5. fallback imagegrab (X11 only)
+            else:
+                try:
+                    ImageGrab.grab().save(path, "PNG")
+                except:
+                    raise Exception("No hay herramienta disponible para capturas en este sistema.")
+
         elif self.system == "Darwin":
-            try:
-                os_system(f"screencapture -x {path}")
-            except Exception as e:
-                print(f"Error al tomar la captura de pantalla: {e}")
+            os_system(f"screencapture -x {path}")
+
         return open(path, "rb")
 
     def lock_screen(self):
         if self.system == "Windows":
             os_system("rundll32.exe user32.dll,LockWorkStation")
-        elif self.system == "Linux":
-            os_system(
-                "dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock")
+
         elif self.system == "Darwin":
             os_system("pmset displaysleepnow")
+
+        elif self.system == "Linux":
+            # 1. i3lock
+            if shutil.which("i3lock"):
+                os_system("i3lock")
+            # 2. swaylock (Wayland)
+            elif shutil.which("swaylock"):
+                os_system("swaylock")
+            # 3. GNOME
+            elif shutil.which("gnome-screensaver-command"):
+                os_system("gnome-screensaver-command -l")
+            # 4. Cinnamon
+            elif shutil.which("cinnamon-screensaver-command"):
+                os_system("cinnamon-screensaver-command -l")
+            # 5. MATE
+            elif shutil.which("mate-screensaver-command"):
+                os_system("mate-screensaver-command -l")
+            # 6. XFCE
+            elif shutil.which("xflock4"):
+                os_system("xflock4")
+            # 7. KDE Plasma
+            elif shutil.which("qdbus"):
+                os_system("qdbus org.freedesktop.ScreenSaver /ScreenSaver Lock")
+            # 8. Omarchy
+            elif shutil.which("omarchy-lock-screen"):
+                os_system("omarchy-lock-screen")
+            else:
+                raise Exception("No se encontró ningún mecanismo para bloquear la pantalla en este sistema.")
 
     def turn_off(self):
         if self.system == "Windows":
