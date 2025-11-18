@@ -93,15 +93,34 @@ class OSService:
     def mute_system(self):
         if self.system == "Windows":
             os_system("nircmd mutesysvolume 1")
-        elif self.system == "Linux":
-            os_system("amixer set Master mute")
+
         elif self.system == "Darwin":
             os_system("osascript -e 'set volume output muted true'")
+
+        elif self.system == "Linux":
+            # 1. pactl (PulseAudio / PipeWire)
+            if shutil.which("pactl"):
+                os_system("pactl set-sink-mute @DEFAULT_SINK@ 1")
+            # 2. amixer (ALSA)
+            elif shutil.which("amixer"):
+                os_system("amixer set Master mute")
+            else:
+                raise Exception("No se encontró forma de mutear el sistema en este Linux.")
+
 
     def unmute_system(self):
         if self.system == "Windows":
             os_system("nircmd mutesysvolume 0")
-        elif self.system == "Linux":
-            os_system("amixer set Master unmute")
+
         elif self.system == "Darwin":
             os_system("osascript -e 'set volume output muted false'")
+
+        elif self.system == "Linux":
+            # 1. pactl
+            if shutil.which("pactl"):
+                os_system("pactl set-sink-mute @DEFAULT_SINK@ 0")
+            # 2. amixer
+            elif shutil.which("amixer"):
+                os_system("amixer set Master unmute")
+            else:
+                raise Exception("No se encontró forma de desmutear el sistema en este Linux.")
