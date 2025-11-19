@@ -1,5 +1,5 @@
 from cv2 import VideoCapture, imwrite
-from services.os_service import OSService
+from services.os_services.os_service import OSService
 
 
 class CameraService:

@@ -5,7 +5,7 @@
 
 from sys import exit as terminate
 from services.camera_service import CameraService
-from services.os_service import OSService
+from services.os_services.os_service import OSService
 from services.thread_service import ThreadService
 from utils.retry import retry
 from services.telegram_service import TelegramService

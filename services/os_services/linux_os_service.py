@@ -1,7 +1,7 @@
 import shutil
 from os import system as os_system
 from PIL import ImageGrab
-from services.base_os_service import BaseOSService
+from services.os_services.base_os_service import BaseOSService
 
 
 class LinuxOSService(BaseOSService):
