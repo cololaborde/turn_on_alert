@@ -4,7 +4,7 @@ from PIL import ImageGrab
 
 class WindowsOSService(BaseOSService):
 
-    def get_screenshot(self):
+    def get_screen_shot(self):
         path = "screenshot.png"
         ImageGrab.grab().save(path, "PNG")
         return open(path, "rb")

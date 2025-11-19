@@ -4,7 +4,7 @@ from PIL import ImageGrab
 
 class MacOSService(BaseOSService):
 
-    def get_screenshot(self):
+    def get_screen_shot(self):
         path = "screenshot.png"
         os_system(f"screencapture -x {path}")
         return open(path, "rb")

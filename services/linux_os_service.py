@@ -6,7 +6,7 @@ from services.base_os_service import BaseOSService
 
 class LinuxOSService(BaseOSService):
 
-    def get_screenshot(self):
+    def get_screen_shot(self):
         path = "screenshot.png"
 
         if shutil.which("grim"):
