@@ -7,6 +7,7 @@ from sys import exit as terminate
 from services.camera_service import CameraService
 from services.os_services.os_service import OSService
 from services.thread_service import ThreadService
+from services.google_geolocator_service import GoogleGeoLocator
 from utils.retry import retry
 from services.telegram_service import TelegramService
 from utils.utils import get_global_ip, get_warning_message, get_buttons
@@ -57,11 +58,12 @@ if device:
 
 thread_service = ThreadService()
 
-get_global_ip_retry = retry(RETRIES, TIME_OUT)(get_global_ip)
-process_response = thread_service.create_thread(get_global_ip_retry)
-if not process_response:
-    terminate(1)
-global_ip = process_response.content.decode()
+message, lat, lon = thread_service.create_thread(retry(RETRIES, TIME_OUT)(get_warning_message)) or (None, None, None)
+
+google_api_key = os_service.get_environ("google_api_key")
+geo_service = GoogleGeoLocator(google_api_key)
+if google_api_key:
+    lat, lon = thread_service.create_thread(retry(RETRIES, TIME_OUT)(geo_service.geolocate_google)) or (None, None)
 
 tlg_service = TelegramService(
     os_service.get_environ("tlg_api_key"),
@@ -70,7 +72,6 @@ tlg_service = TelegramService(
 
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
 send_location_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_location)
-message, lat, lon = get_warning_message(global_ip)
 try:
     send_with_retry(message, buttons=get_buttons())
     send_location_with_retry(lat, lon)

@@ -26,7 +26,8 @@ def get_data_from_ip(ip):
         raise
 
 
-def get_warning_message(global_ip):
+def get_warning_message():
+    global_ip = get_global_ip().content.decode()
     ip_data = get_data_from_ip(global_ip)
     return (
         f"⚠️ Nuevo inicio detectado ⚠️\n\n"
