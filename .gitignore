@@ -4,3 +4,4 @@ venv
 alert.sh
 processed_ids.json
 .python-version
+*.log
