@@ -58,17 +58,19 @@ if device:
 
 thread_service = ThreadService()
 
-message, lat, lon = thread_service.create_thread(retry(RETRIES, TIME_OUT)(get_warning_message)) or (None, None, None)
+message, lat_by_ip, lon_by_ip = thread_service.create_thread(retry(RETRIES, TIME_OUT)(get_warning_message)) or (None, None, None)
 
 google_api_key = os_service.get_environ("google_api_key")
 geo_service = GoogleGeoLocator(google_api_key)
 if google_api_key:
-    lat, lon = thread_service.create_thread(retry(RETRIES, TIME_OUT)(geo_service.geolocate_google)) or (None, None)
+    lat_by_google, lon_by_google = thread_service.create_thread(retry(RETRIES, TIME_OUT)(geo_service.geolocate_google)) or (None, None)
 
 tlg_service = TelegramService(
     os_service.get_environ("tlg_api_key"),
     os_service.get_environ("chat_id")
 )
+
+lat, lon = lat_by_google or lat_by_ip, lon_by_google or lon_by_ip
 
 send_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_message)
 send_location_with_retry = retry(RETRIES, TIME_OUT)(tlg_service.send_location)
