@@ -64,6 +64,8 @@ google_api_key = os_service.get_environ("google_api_key")
 geo_service = GoogleGeoLocator(google_api_key)
 if google_api_key:
     lat_by_google, lon_by_google = thread_service.create_thread(retry(RETRIES, TIME_OUT)(geo_service.geolocate_google)) or (None, None)
+else:
+    lat_by_google, lon_by_google = None, None
 
 tlg_service = TelegramService(
     os_service.get_environ("tlg_api_key"),
