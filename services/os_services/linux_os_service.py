@@ -1,10 +1,42 @@
 import shutil
-from os import system as os_system
+from os import system as os_system, environ as os_environ
 from PIL import ImageGrab
 from services.os_services.base_os_service import BaseOSService
+import subprocess
+
+LOCKERS = {
+    "hyprland": {
+        "env": lambda: os_environ.get("HYPRLAND_INSTANCE_SIGNATURE"),
+        "commands": [["hyprlock"]],
+    },
+    "sway": {
+        "env": lambda: os_environ.get("XDG_CURRENT_DESKTOP", "").lower() == "sway",
+        "commands": [["swaylock"]],
+    },
+    "wayland-generic": {
+        "env": lambda: os_environ.get("XDG_SESSION_TYPE") == "wayland",
+        "commands": [["swaylock"]],
+    },
+    "x11": {
+        "env": lambda: os_environ.get("XDG_SESSION_TYPE") == "x11",
+        "commands": [["i3lock"]],
+    },
+    "gnome": {
+        "env": lambda: "gnome" in os_environ.get("XDG_CURRENT_DESKTOP", "").lower(),
+        "commands": [["gnome-screensaver-command", "-l"]],
+    },
+    "xfce": {
+        "env": lambda: "xfce" in os_environ.get("XDG_CURRENT_DESKTOP", "").lower(),
+        "commands": [["xflock4"]],
+    },
+}
+
 
 
 class LinuxOSService(BaseOSService):
+
+    def command_exists(self, cmd):
+        return shutil.which(cmd[0]) is not None
 
     def get_screen_shot(self):
         path = "screenshot.png"
@@ -23,24 +55,14 @@ class LinuxOSService(BaseOSService):
         return open(path, "rb")
 
     def lock_screen(self):
-        if shutil.which("i3lock"):
-            os_system("i3lock")
-        elif shutil.which("swaylock"):
-            os_system("swaylock")
-        elif shutil.which("gnome-screensaver-command"):
-            os_system("gnome-screensaver-command -l")
-        elif shutil.which("cinnamon-screensaver-command"):
-            os_system("cinnamon-screensaver-command -l")
-        elif shutil.which("mate-screensaver-command"):
-            os_system("mate-screensaver-command -l")
-        elif shutil.which("xflock4"):
-            os_system("xflock4")
-        elif shutil.which("qdbus"):
-            os_system("qdbus org.freedesktop.ScreenSaver /ScreenSaver Lock")
-        elif shutil.which("omarchy-lock-screen"):
-            os_system("omarchy-lock-screen")
-        else:
-            raise Exception("No lock screen available.")
+        for locker in LOCKERS.values():
+            if locker["env"]():
+                for cmd in locker["commands"]:
+                    if self.command_exists(cmd):
+                        subprocess.run(cmd)
+                        return
+
+        raise RuntimeError("No compatible lock screen found.")
 
     def turn_off(self):
         os_system("poweroff")
