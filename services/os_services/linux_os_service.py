@@ -4,32 +4,13 @@ from PIL import ImageGrab
 from services.os_services.base_os_service import BaseOSService
 import subprocess
 
-LOCKERS = {
-    "hyprland": {
-        "env": lambda: os_environ.get("HYPRLAND_INSTANCE_SIGNATURE"),
-        "commands": [["hyprlock"]],
-    },
-    "sway": {
-        "env": lambda: os_environ.get("XDG_CURRENT_DESKTOP", "").lower() == "sway",
-        "commands": [["swaylock"]],
-    },
-    "wayland-generic": {
-        "env": lambda: os_environ.get("XDG_SESSION_TYPE") == "wayland",
-        "commands": [["swaylock"]],
-    },
-    "x11": {
-        "env": lambda: os_environ.get("XDG_SESSION_TYPE") == "x11",
-        "commands": [["i3lock"]],
-    },
-    "gnome": {
-        "env": lambda: "gnome" in os_environ.get("XDG_CURRENT_DESKTOP", "").lower(),
-        "commands": [["gnome-screensaver-command", "-l"]],
-    },
-    "xfce": {
-        "env": lambda: "xfce" in os_environ.get("XDG_CURRENT_DESKTOP", "").lower(),
-        "commands": [["xflock4"]],
-    },
-}
+LOCKERS = [
+    ["loginctl", "lock-session"],
+    ["hyprlock"],
+    ["swaylock"],
+    ["i3lock"],
+    ["xflock4"],
+]
 
 
 
@@ -55,12 +36,13 @@ class LinuxOSService(BaseOSService):
         return open(path, "rb")
 
     def lock_screen(self):
-        for locker in LOCKERS.values():
-            if locker["env"]():
-                for cmd in locker["commands"]:
-                    if self.command_exists(cmd):
-                        subprocess.run(cmd)
-                        return
+        for cmd in LOCKERS:
+            if shutil.which(cmd[0]):
+                try:
+                    subprocess.run(cmd, check=True)
+                    return
+                except Exception:
+                    pass
 
         raise RuntimeError("No compatible lock screen found.")
 
