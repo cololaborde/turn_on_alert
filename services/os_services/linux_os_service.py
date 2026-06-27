@@ -41,6 +41,8 @@ def _get_wayland_screenshot():
 
     subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
 
+    time.sleep(2)
+
     return _get_screen_path()
 
 class LinuxOSService(BaseOSService):
