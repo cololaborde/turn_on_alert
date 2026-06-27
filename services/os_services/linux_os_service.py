@@ -16,9 +16,6 @@ LOCKERS = [
 
 class LinuxOSService(BaseOSService):
 
-    def command_exists(self, cmd):
-        return shutil.which(cmd[0]) is not None
-
     def get_screen_shot(self):
         path = "screenshot.png"
 
